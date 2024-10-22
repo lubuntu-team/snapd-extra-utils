@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+export DH_VERBOSE = 1
+export GO111MODULE = off
+export GOPATH=/usr/share/gocode
+export GOCACHE=$(CURDIR)/.gocache
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	(cd snapd-seed-glue && go build -gcflags="all=-N -l" -ldflags="-compressdwarf=false" -o snapd-seed-glue)
+	(cd snapd-installation-monitor && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . && make)

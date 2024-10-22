@@ -1,0 +1,2 @@
+snapd-installation-monitor/snapd-installation-monitor /usr/libexec
+snapd-installation-monitor/snapd-installation-monitor.desktop /etc/xdg/autostart
