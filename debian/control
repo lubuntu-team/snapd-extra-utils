@@ -10,12 +10,12 @@ Build-Depends: debhelper-compat (= 13),
                golang-gopkg-yaml.v3-dev,
                qt6-base-dev
 Standards-Version: 4.7.0
-#Vcs-Browser: https://salsa.debian.org/debian/snapd-extra-utils
-#Vcs-Git: https://salsa.debian.org/debian/snapd-extra-utils.git
+Vcs-Browser: https://git.lubuntu.me/Lubuntu/snapd-extra-utils
+Vcs-Git: https://git.lubuntu.me/Lubuntu/snapd-extra-utils.git
 
 Package: snapd-seed-glue
 Architecture: any
-Depends: snapd, ${misc:Depends}, ${shlibs:Depends}
+Depends: snapd, xdelta3, ${misc:Depends}, ${shlibs:Depends}
 Description: Installer and pre-seed utilities for snapd
  Primarily used in Calamares, snapd-seed-glue updates snap seeds in a given
  directory, on a pre-booted system. It handles dependency resolution, delta
