@@ -10,11 +10,11 @@ import (
 )
 
 // cleanUpFiles removes partial, old, and orphaned snap and assertion files from the download and assertions directories.
-func cleanUpFiles(snapsDir, assertionsDir, seedYaml string) {
+func cleanUpFiles(snapsDir string, assertionsDir string) {
     verboseLog("Starting cleanup process...")
 
     // Load the seed.yaml data
-    seedData := loadSeedData(seedYaml)
+    seedData := loadSeedData()
 
     // Create a map of valid snap and assertion files based on seed.yaml
     validSnaps := make(map[string]bool)

@@ -12,15 +12,6 @@ import (
     "github.com/snapcore/snapd/store"
 )
 
-// Seed structure for seed.yaml
-type seed struct {
-    Snaps []struct {
-        Name    string `yaml:"name"`
-        Channel string `yaml:"channel"`
-        File    string `yaml:"file"`
-    } `yaml:"snaps"`
-}
-
 var (
     ctx            = context.Background()
     storeClient    *store.Store
@@ -30,6 +21,7 @@ var (
     processedSnaps = make(map[string]bool)
     snapSizeMap    = make(map[string]float64)
     totalSnapSize  float64
+    seedYaml       string
 )
 
 type SnapInfo struct {
@@ -61,14 +53,14 @@ func main() {
     // Define directories based on the seed directory
     snapsDir := filepath.Join(seedDirectory, "snaps")
     assertionsDir := filepath.Join(seedDirectory, "assertions")
-    seedYaml := filepath.Join(seedDirectory, "seed.yaml")
+    seedYaml = filepath.Join(seedDirectory, "seed.yaml")
 
     // Setup directories and seed.yaml
     initializeDirectories(snapsDir, assertionsDir)
-    initializeSeedYaml(seedYaml)
+    initializeSeedYaml()
 
     // Load existing snaps from seed.yaml
-    existingSnapsInYaml := loadExistingSnaps(seedYaml)
+    existingSnapsInYaml := loadExistingSnaps()
 
     // Populate currentSnaps based on existing snaps
     for snapName := range existingSnapsInYaml {
@@ -133,7 +125,7 @@ func main() {
     cleanUpCurrentSnaps(assertionsDir, snapsDir)
 
     // Update seed.yaml with the current required snaps
-    if err := updateSeedYaml(snapsDir, seedYaml, currentSnaps); err != nil {
+    if err := updateSeedYaml(snapsDir, currentSnaps); err != nil {
         log.Fatalf("Failed to update seed.yaml: %v", err)
     }
 
@@ -143,7 +135,7 @@ func main() {
     if err := validateSeed(seedYaml); err != nil {
         log.Fatalf("Seed validation failed: %v", err)
     }
-    cleanUpFiles(snapsDir, assertionsDir, seedYaml)
+    cleanUpFiles(snapsDir, assertionsDir)
 
     // Mark "Finalizing" as complete
     if progressTracker != nil {
@@ -155,11 +147,21 @@ func main() {
 func collectSnapsToProcess(snapsDir, assertionsDir string) ([]SnapDetails, error) {
     var snapsToProcess []SnapDetails
 
+    versionID, err := getVersionID()
+    if err != nil {
+        return nil, err
+    }
+
+    defaultChannel := "latest/stable/ubuntu-" + versionID
+    if err != nil {
+        return nil, err
+    }
+
     fallbackChannel := "latest/stable"
     for snapEntry := range requiredSnaps {
         // Extract channel if specified, default to "stable"
         parts := strings.SplitN(snapEntry, "=", 2)
-        channel := "latest/stable/ubuntu-25.04"
+        channel := defaultChannel
         if len(parts) == 2 {
             channel = parts[1]
         }
@@ -173,9 +175,10 @@ func collectSnapsToProcess(snapsDir, assertionsDir string) ([]SnapDetails, error
 
         // Append only those snaps that need updates
         for _, snapDetails := range snapList {
-            verboseLog("Processing snap: %s with result: %v", snapDetails.InstanceName, snapDetails.Result)
+            verboseLog("Processing snap: %s", snapDetails.InstanceName)
             if len(snapDetails.Result.Deltas) > 0 {
                 for _, delta := range snapDetails.Result.Deltas {
+                    verboseLog("Delta found for %s from %d to %d", snapDetails.InstanceName, delta.FromRevision, delta.ToRevision)
                     snapSize := float64(delta.Size)
                     snapSizeMap[snapDetails.Result.Info.SuggestedName] = snapSize
                     totalSnapSize += snapSize

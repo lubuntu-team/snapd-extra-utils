@@ -148,3 +148,28 @@ func verifySnapIntegrity(filePath, expectedChecksum string) bool {
     }
     return checksumMatches
 }
+
+// Get the raw VERSION_ID from /etc/os-release to use for branch detection
+func getVersionID() (string, error) {
+    file, err := os.Open("/etc/os-release")
+    if err != nil {
+        return "", fmt.Errorf("failed to open /etc/os-release: %w", err)
+    }
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+    for scanner.Scan() {
+        line := scanner.Text()
+        if strings.HasPrefix(line, "VERSION_ID=") {
+            // Remove the prefix and any surrounding quotes
+            versionID := strings.Trim(strings.SplitN(line, "=", 2)[1], `"`)
+            return versionID, nil
+        }
+    }
+
+    if err := scanner.Err(); err != nil {
+        return "", fmt.Errorf("error reading /etc/os-release: %w", err)
+    }
+
+    return "", fmt.Errorf("VERSION_ID not found in /etc/os-release")
+}

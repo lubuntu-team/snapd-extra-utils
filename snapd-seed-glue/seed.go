@@ -5,13 +5,42 @@ import (
     "io/ioutil"
     "log"
     "os"
+    "strings"
 
     "gopkg.in/yaml.v3"
     "github.com/snapcore/snapd/store"
 )
 
+type seed struct {
+    Snaps []struct {
+        Name    string `yaml:"name"`
+        Channel string `yaml:"channel"`
+        File    string `yaml:"file"`
+    } `yaml:"snaps"`
+}
+
+// getChannelName returns the channel name for a specific snap name
+func getChannelName(snapName string) (string, error) {
+    file, err := ioutil.ReadFile(seedYaml)
+    if err != nil {
+        return "", fmt.Errorf("failed to read seed.yaml: %w", err)
+    }
+
+    var seedData seed
+    if err := yaml.Unmarshal(file, &seedData); err != nil {
+        return "", fmt.Errorf("failed to parse seed.yaml: %w", err)
+    }
+
+    for _, snap := range seedData.Snaps {
+        if snap.Name == snapName {
+            return snap.Channel, nil
+        }
+    }
+    return "", fmt.Errorf("snap %s not found in seed.yaml", snapName)
+}
+
 // initializeSeedYaml ensures that seed.yaml exists; if not, creates it.
-func initializeSeedYaml(seedYaml string) {
+func initializeSeedYaml() {
     if _, err := os.Stat(seedYaml); os.IsNotExist(err) {
         file, err := os.Create(seedYaml)
         if err != nil {
@@ -23,7 +52,7 @@ func initializeSeedYaml(seedYaml string) {
 }
 
 // loadSeedData loads seed data from seed.yaml
-func loadSeedData(seedYaml string) seed {
+func loadSeedData() seed {
     file, err := ioutil.ReadFile(seedYaml)
     if err != nil {
         log.Fatalf("Failed to read seed.yaml: %v", err)
@@ -38,7 +67,7 @@ func loadSeedData(seedYaml string) seed {
 }
 
 // loadExistingSnaps loads snaps from seed.yaml into a map
-func loadExistingSnaps(seedYaml string) map[string]bool {
+func loadExistingSnaps() map[string]bool {
     file, err := ioutil.ReadFile(seedYaml)
     if err != nil {
         log.Fatalf("Failed to read seed.yaml: %v", err)
@@ -58,7 +87,7 @@ func loadExistingSnaps(seedYaml string) map[string]bool {
 }
 
 // updateSeedYaml updates the seed.yaml file with the current required snaps
-func updateSeedYaml(snapsDir, seedYaml string, currentSnaps []*store.CurrentSnap) error {
+func updateSeedYaml(snapsDir string, currentSnaps []*store.CurrentSnap) error {
     // Log the snaps to be written
     verboseLog("CurrentSnaps to be written to seed.yaml:")
     for _, snapInfo := range currentSnaps {
@@ -92,7 +121,7 @@ func updateSeedYaml(snapsDir, seedYaml string, currentSnaps []*store.CurrentSnap
             File    string `yaml:"file"`
         }{
             Name:    snapInfo.InstanceName,
-            Channel: "stable", // Assuming 'stable' channel; modify as needed
+            Channel: strings.Replace(snapInfo.TrackingChannel, "latest/", "", -1),
             File:    snapFileName,
         }
         seedData.Snaps = append(seedData.Snaps, snapData)

@@ -32,6 +32,7 @@ func collectSnapDependencies(snapName, channel, fallbackChannel, snapsDir, asser
 
     var result *store.SnapActionResult
     var err error
+    workingChannel := ""
 
     // Fetch or refresh snap information
     if oldSnap == nil || oldSnap.SnapID == "" || oldSnap.Revision.N == 0 {
@@ -41,18 +42,25 @@ func collectSnapDependencies(snapName, channel, fallbackChannel, snapsDir, asser
                 result, err = fetchOrRefreshSnapInfo(snapName, nil, fallbackChannel)
                 if err != nil {
                     return nil, err
+                } else {
+                    workingChannel = fallbackChannel
                 }
             } else {
                 return nil, err
             }
+        } else {
+            workingChannel = channel
         }
     } else {
+        verboseLog("Old snap info: %s %d", oldSnap.SnapID, oldSnap.Revision.N)
         result, err = fetchOrRefreshSnapInfo(snapName, oldSnap, channel)
         if err != nil {
             if strings.Contains(err.Error(), "snap has no updates available") {
                 result, err = fetchOrRefreshSnapInfo(snapName, nil, channel)
                 if err != nil {
                     return nil, err
+                } else {
+                    workingChannel = channel
                 }
             } else if strings.Contains(err.Error(), "no snap revision available as specified") {
                 result, err = fetchOrRefreshSnapInfo(snapName, oldSnap, fallbackChannel)
@@ -61,14 +69,20 @@ func collectSnapDependencies(snapName, channel, fallbackChannel, snapsDir, asser
                         result, err = fetchOrRefreshSnapInfo(snapName, nil, fallbackChannel)
                         if err != nil {
                             return nil, err
+                        } else {
+                            workingChannel = fallbackChannel
                         }
                     } else {
                         return nil, err
                     }
+                } else {
+                    workingChannel = fallbackChannel
                 }
             } else {
                 return nil, err
             }
+        } else {
+            workingChannel = channel
         }
     }
 
@@ -78,9 +92,10 @@ func collectSnapDependencies(snapName, channel, fallbackChannel, snapsDir, asser
 
     info := result.Info
     newSnap := &store.CurrentSnap{
-        InstanceName: snapName,
-        SnapID:       info.SnapID,
-        Revision:     snap.Revision{N: info.Revision.N},
+        InstanceName:    snapName,
+        SnapID:          info.SnapID,
+        Revision:        snap.Revision{N: info.Revision.N},
+        TrackingChannel: workingChannel,
     }
     snapInCurrentSnaps, oldRevision := isSnapInCurrentSnaps(snapName)
     if snapInCurrentSnaps {
@@ -176,7 +191,7 @@ func fetchOrRefreshSnapInfo(snapName string, currentSnap *store.CurrentSnap, cha
     results, _, err := storeClient.SnapAction(ctx, includeSnap, actions, nil, nil, nil)
     if err != nil {
         verboseLog("SnapAction error for %s: %v", snapName, err)
-        if strings.Contains(err.Error(), "snap has no updates available") && currentSnap != nil {
+        if (strings.Contains(err.Error(), "snap has no updates available") || strings.Contains(err.Error(), "no snap revision available as specified")) && currentSnap != nil {
             return nil, err
         }
         return nil, fmt.Errorf("snap action failed for %s: %w", snapName, err)
@@ -232,6 +247,12 @@ func findPreviousSnap(downloadDir, assertionsDir, snapName string) (string, *sto
                 assertFilePath := filepath.Join(assertionsDir, strings.Replace(file.Name(), ".snap", ".assert", 1))
                 currentSnap = parseSnapInfo(assertFilePath, snapName)
                 currentSnap.Revision.N = revision
+                trackingChannel, err := getChannelName(snapName)
+                if err != nil {
+                    verboseLog("Failed to get existing channel name for %s", snapName)
+                    continue
+                }
+                currentSnap.TrackingChannel = "latest/" + trackingChannel
             }
         }
     }
