@@ -1,3 +1,9 @@
+snapd-extra-utils (1.0.1) UNRELEASED; urgency=medium
+
+  * Add missing cmake build dependency.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Tue, 29 Oct 2024 18:56:25 -0500
+
 snapd-extra-utils (1.0.0) plucky; urgency=medium
 
   * Initial release (LP: #2061318).

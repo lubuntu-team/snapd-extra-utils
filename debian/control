@@ -3,7 +3,8 @@ Section: devel
 Priority: optional
 Maintainer: Simon Quigley <tsimonq2@ubuntu.com>
 Rules-Requires-Root: no
-Build-Depends: debhelper-compat (= 13),
+Build-Depends: cmake,
+               debhelper-compat (= 13),
                golang-github-snapcore-snapd-dev (>= 2.62),
                golang-go,
                golang-golang-x-crypto-dev,
