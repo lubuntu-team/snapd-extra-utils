@@ -15,6 +15,7 @@ package main
 import (
     "fmt"
     "os"
+    "math"
     "path/filepath"
     "strconv"
     "strings"
@@ -103,10 +104,18 @@ func collectSnapDependencies(snapName, channel, fallbackChannel, snapsDir, asser
     }
 
     info := result.Info
+
+    // If the snap we fetched has a lower revision than the snap installed, use that
+    newRevision := 0
+    if info.Revision.N != 0 && oldSnap != nil && oldSnap.Revision.N != 0 {
+        newRevision = int(math.Max(float64(info.Revision.N), float64(oldSnap.Revision.N)))
+    } else {
+        newRevision = info.Revision.N
+    }
     newSnap := &store.CurrentSnap{
         InstanceName:    snapName,
         SnapID:          info.SnapID,
-        Revision:        snap.Revision{N: info.Revision.N},
+        Revision:        snap.Revision{N: newRevision},
         TrackingChannel: workingChannel,
     }
     snapInCurrentSnaps, oldRevision := isSnapInCurrentSnaps(snapName)
