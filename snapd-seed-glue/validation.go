@@ -62,12 +62,7 @@ func ensureAssertions(assertionsDir string) {
         if signKeySha3 == "" {
             log.Fatalf("Failed to extract sign-key-sha3-384 from model assertion.")
         }
-        decodedSignKey, err := base64.StdEncoding.DecodeString(signKeySha3)
-        if err != nil {
-            log.Fatalf("Failed to decode sign-key-sha3-384: %v", err)
-        }
-        encodedSignKey := base64.StdEncoding.EncodeToString(decodedSignKey)
-        output, err := exec.Command("snap", "known", "--remote", "account-key", "public-key-sha3-384="+encodedSignKey).CombinedOutput()
+        output, err := exec.Command("snap", "known", "--remote", "account-key", "public-key-sha3-384="+signKeySha3).CombinedOutput()
         if err != nil {
             log.Fatalf("Failed to fetch account-key assertion: %v, Output: %s", err, string(output))
         }
