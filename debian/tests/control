@@ -1,0 +1,3 @@
+Tests: snapd-seed-glue
+Depends: snapd-seed-glue
+Restrictions: needs-internet

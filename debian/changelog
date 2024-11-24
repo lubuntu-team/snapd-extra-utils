@@ -1,6 +1,7 @@
 snapd-extra-utils (1.0.2ubuntu1) UNRELEASED; urgency=medium
 
   * In snapd-seed-glue, remove redundant decoding/encoding for account key.
+  * Add an autopkgtest for snapd-seed-glue.
 
  -- Simon Quigley <tsimonq2@ubuntu.com>  Sat, 23 Nov 2024 21:05:07 -0600
 

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+# File to track command output, so we can check for successful completion
+OUTPUT_FILE=$(mktemp)
+
+# If the command output does not contain a final confirmation of success, exit 1
+confirm_success () {
+    if grep -q "Cleanup and validation completed" "$OUTPUT_FILE"; then
+        rm -f "$OUTPUT_FILE"
+    else
+        exit 1
+    fi
+}
+
+echo "Testing snapd-seed-glue with firefox..."
+
+/usr/bin/snapd-seed-glue --verbose --seed firefox_test firefox > >(tee -a "$OUTPUT_FILE") 2>&1
+confirm_success
+
+echo "Add krita to the same seed..."
+
+/usr/bin/snapd-seed-glue --verbose --seed firefox_test firefox krita > >(tee -a "$OUTPUT_FILE") 2>&1
+confirm_success
+
+echo "Remove krita and replace it with Thunderbird..."
+
+/usr/bin/snapd-seed-glue --verbose --seed firefox_test firefox thunderbird > >(tee -a "$OUTPUT_FILE") 2>&1
+confirm_success
+
+echo "Confirm that non-existent snaps will fail..."
+
+/usr/bin/snapd-seed-glue --verbose --seed test_dir absolutelyridiculouslongnamethatwilldefinitelyneverexist > >(tee -a "$OUTPUT_FILE") 2>&1 || echo "Fail expected"
+if ! grep -q "cannot install snap \"absolutelyridiculouslongnamethatwilldefinitelyneverexist\": snap not found" "$OUTPUT_FILE"; then
+    exit 1
+fi
