@@ -1,8 +1,8 @@
-snapd-extra-utils (1.0.5) UNRELEASED; urgency=medium
+snapd-extra-utils (1.0.5) plucky; urgency=medium
 
   * [autopkgtest] Convert the snapd-seed-glue autopkgtest to C++.
 
- -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 24 Nov 2024 23:07:39 -0600
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 24 Nov 2024 23:12:13 -0600
 
 snapd-extra-utils (1.0.4) plucky; urgency=medium
 
