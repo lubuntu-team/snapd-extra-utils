@@ -14,22 +14,25 @@ confirm_success () {
     fi
 }
 
-echo "Testing snapd-seed-glue with hello..."
+# Function to run snapd-seed-glue with given arguments
+run_snapd_seed_glue () {
+    /usr/bin/snapd-seed-glue --verbose --seed hello_test "$@" > >(tee -a "$OUTPUT_FILE") 2>&1
+    confirm_success
+}
 
-/usr/bin/snapd-seed-glue --verbose --seed hello_test hello > >(tee -a "$OUTPUT_FILE") 2>&1
-confirm_success
+echo "[snapd-seed-glue autopkgtest] Testing snapd-seed-glue with hello..."
 
-echo "Add htop to the same seed..."
+run_snapd_seed_glue hello
 
-/usr/bin/snapd-seed-glue --verbose --seed hello_test hello htop > >(tee -a "$OUTPUT_FILE") 2>&1
-confirm_success
+echo "[snapd-seed-glue autopkgtest] Add htop to the same seed..."
 
-echo "Remove htop and replace it with btop..."
+run_snapd_seed_glue hello htop
 
-/usr/bin/snapd-seed-glue --verbose --seed hello_test hello btop > >(tee -a "$OUTPUT_FILE") 2>&1
-confirm_success
+echo "[snapd-seed-glue autopkgtest] Remove htop and replace it with btop..."
 
-echo "Confirm that non-existent snaps will fail..."
+run_snapd_seed_glue hello btop
+
+echo "[snapd-seed-glue autopkgtest] Confirm that non-existent snaps will fail..."
 
 /usr/bin/snapd-seed-glue --verbose --seed test_dir absolutelyridiculouslongnamethatwilldefinitelyneverexist > >(tee -a "$OUTPUT_FILE") 2>&1 || echo "Fail expected"
 if ! grep -q "cannot install snap \"absolutelyridiculouslongnamethatwilldefinitelyneverexist\": snap not found" "$OUTPUT_FILE"; then

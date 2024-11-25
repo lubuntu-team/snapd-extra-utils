@@ -2,6 +2,7 @@ snapd-extra-utils (1.0.4) UNRELEASED; urgency=medium
 
   * [autopkgtest] Use snaps that are available on all arches, to fix armhf,
     ppc64el, and s390x failures.
+  * [autopkgtest] Refactor the snapd-seed-glue calls for deduplication.
 
  -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 24 Nov 2024 20:55:54 -0600
 
