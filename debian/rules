@@ -3,11 +3,12 @@ export DH_VERBOSE = 1
 export GO111MODULE = off
 export GOPATH=/usr/share/gocode
 export GOCACHE=$(CURDIR)/.gocache
+export NUM_CPUS = $(shell nproc)
 
 %:
 	dh $@
 
 override_dh_auto_build:
 	(cd snapd-seed-glue && go build -gcflags="all=-N -l" -ldflags="-compressdwarf=false" -o snapd-seed-glue)
-	(cd snapd-seed-glue/tests && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . && make -j2 && mv snapd_seed_glue_test ../../debian/tests/snapd-seed-glue)
-	(cd snapd-installation-monitor && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . && make -j2)
+	(cd snapd-seed-glue/tests && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . && make -j${NUM_CPUS})
+	(cd snapd-installation-monitor && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . && make -j${NUM_CPUS})

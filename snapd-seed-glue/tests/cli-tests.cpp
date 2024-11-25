@@ -48,7 +48,7 @@ void confirm_success() {
 }
 
 void run_snapd_seed_glue(const std::vector<std::string>& args) {
-    std::string cmd = "/usr/bin/snapd-seed-glue --verbose --seed hello_test";
+    std::string cmd = "snapd-seed-glue/snapd-seed-glue --verbose --seed hello_test";
     for (const auto& arg : args) {
         cmd += " " + arg;
     }

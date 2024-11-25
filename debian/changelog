@@ -1,3 +1,9 @@
+snapd-extra-utils (1.0.6) UNRELEASED; urgency=medium
+
+  * [autopkgtest] Further refactoring to properly run the autopkgtest.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Mon, 25 Nov 2024 01:12:04 -0600
+
 snapd-extra-utils (1.0.5) plucky; urgency=medium
 
   * [autopkgtest] Convert the snapd-seed-glue autopkgtest to C++.
