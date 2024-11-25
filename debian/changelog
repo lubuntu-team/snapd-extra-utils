@@ -1,10 +1,10 @@
-snapd-extra-utils (1.0.4) UNRELEASED; urgency=medium
+snapd-extra-utils (1.0.4) plucky; urgency=medium
 
   * [autopkgtest] Use snaps that are available on all arches, to fix armhf,
     ppc64el, and s390x failures.
   * [autopkgtest] Refactor the snapd-seed-glue calls for deduplication.
 
- -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 24 Nov 2024 20:55:54 -0600
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 24 Nov 2024 21:15:05 -0600
 
 snapd-extra-utils (1.0.3) plucky; urgency=medium
 
