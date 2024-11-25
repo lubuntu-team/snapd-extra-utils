@@ -1,3 +1,10 @@
+snapd-extra-utils (1.0.4) UNRELEASED; urgency=medium
+
+  * [autopkgtest] Use snaps that are available on all arches, to fix armhf,
+    ppc64el, and s390x failures.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 24 Nov 2024 20:55:54 -0600
+
 snapd-extra-utils (1.0.3) plucky; urgency=medium
 
   * In snapd-seed-glue, remove redundant decoding/encoding for account key.

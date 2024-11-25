@@ -14,19 +14,19 @@ confirm_success () {
     fi
 }
 
-echo "Testing snapd-seed-glue with firefox..."
+echo "Testing snapd-seed-glue with hello..."
 
-/usr/bin/snapd-seed-glue --verbose --seed firefox_test firefox > >(tee -a "$OUTPUT_FILE") 2>&1
+/usr/bin/snapd-seed-glue --verbose --seed hello_test hello > >(tee -a "$OUTPUT_FILE") 2>&1
 confirm_success
 
-echo "Add krita to the same seed..."
+echo "Add htop to the same seed..."
 
-/usr/bin/snapd-seed-glue --verbose --seed firefox_test firefox krita > >(tee -a "$OUTPUT_FILE") 2>&1
+/usr/bin/snapd-seed-glue --verbose --seed hello_test hello htop > >(tee -a "$OUTPUT_FILE") 2>&1
 confirm_success
 
-echo "Remove krita and replace it with Thunderbird..."
+echo "Remove htop and replace it with btop..."
 
-/usr/bin/snapd-seed-glue --verbose --seed firefox_test firefox thunderbird > >(tee -a "$OUTPUT_FILE") 2>&1
+/usr/bin/snapd-seed-glue --verbose --seed hello_test hello btop > >(tee -a "$OUTPUT_FILE") 2>&1
 confirm_success
 
 echo "Confirm that non-existent snaps will fail..."
