@@ -17,6 +17,8 @@ Vcs-Git: https://git.lubuntu.me/Lubuntu/snapd-extra-utils.git
 Package: snapd-seed-glue
 Architecture: any
 Depends: snapd, xdelta3, ${misc:Depends}, ${shlibs:Depends}
+Breaks: calamares-settings-ubuntu-common (<< 1:25.04.1)
+Replaces: calamares-settings-ubuntu-common (<< 1:25.04.1)
 Description: Installer and pre-seed utilities for snapd
  Primarily used in Calamares, snapd-seed-glue updates snap seeds in a given
  directory, on a pre-booted system. It handles dependency resolution, delta
@@ -25,6 +27,8 @@ Description: Installer and pre-seed utilities for snapd
 Package: snapd-installation-monitor
 Architecture: any
 Depends: snapd, ${misc:Depends}, ${shlibs:Depends}
+Breaks: lubuntu-snap-installation-monitor
+Replaces: lubuntu-snap-installation-monitor
 Description: First-boot snap install notification
  When many snaps are preseeded, on first boot the user may be confused if they
  can not open one of those snaps. This simple notification informs the user,

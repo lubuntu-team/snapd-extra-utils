@@ -1,3 +1,9 @@
+snapd-extra-utils (1.0.7) UNRELEASED; urgency=medium
+
+  * Add several extra Breaks/Replaces to be safe.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Wed, 11 Dec 2024 22:18:24 -0600
+
 snapd-extra-utils (1.0.6) plucky; urgency=medium
 
   * [autopkgtest] Further refactoring to properly run the autopkgtest.
