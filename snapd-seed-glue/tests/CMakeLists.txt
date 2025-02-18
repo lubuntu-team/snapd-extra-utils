@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 project(snapd_seed_glue_test)
 
 set(CMAKE_CXX_STANDARD 23)

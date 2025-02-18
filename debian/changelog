@@ -1,3 +1,9 @@
+snapd-extra-utils (1.1.0) UNRELEASED; urgency=medium
+
+  * Slightly clean up tests, add new amd64 autopkgtest which checks a livefs.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 16 Feb 2025 13:36:41 -0600
+
 snapd-extra-utils (1.0.7) plucky; urgency=medium
 
   * Add several extra Breaks/Replaces to be safe.
