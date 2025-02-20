@@ -1,3 +1,3 @@
 Test-Command: snapd-seed-glue/tests/snapd_seed_glue_test
-Depends: snapd-seed-glue, tree, livecd-rootfs [amd64]
+Depends: snapd-seed-glue, livecd-rootfs [amd64], squashfs-tools [amd64]
 Restrictions: needs-internet, build-needed, isolation-machine, needs-sudo

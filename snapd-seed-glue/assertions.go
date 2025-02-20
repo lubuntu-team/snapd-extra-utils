@@ -73,25 +73,45 @@ func downloadAssertions(storeClient *store.Store, snapInfo *snap.Info, downloadD
         return fmt.Errorf("failed to fetch account-key assertion for snap %s: %w", snapInfo.SuggestedName, err)
     }
 
-    // Step 4: Fetch account assertion using publisher-id
-    accountAssertion, err := storeClient.Assertion(assertionTypes["account"], []string{publisherID}, nil)
-    if err != nil {
-        return fmt.Errorf("failed to fetch account assertion for snap %s: %w", snapInfo.SuggestedName, err)
-    }
-
-    // Step 5: Fetch snap-revision assertion
+    // Step 4: Fetch snap-revision assertion
     snapSHA384Bytes, err := hex.DecodeString(snapSHA)
     if err != nil {
         return fmt.Errorf("error decoding SHA3-384 hex string for snap %s: %w", snapInfo.SuggestedName, err)
     }
     snapSHA384Base64 := base64.RawURLEncoding.EncodeToString(snapSHA384Bytes)
-    //revisionKey := fmt.Sprintf("%s/global-upload", snapSHA384Base64)
     revisionKey := fmt.Sprintf("%s/", snapSHA384Base64)
 
     snapRevisionAssertion, err := storeClient.Assertion(assertionTypes["snap-revision"], []string{revisionKey}, nil)
     if err != nil {
         verboseLog("Failed to fetch snap-revision assertion for snap %s: %v", snapInfo.SuggestedName, err)
-        // Proceeding without snap-revision might be acceptable based on your use-case
+    }
+
+    // Step 5: Fetch account assertions
+    publisherAccountAssertion, err := storeClient.Assertion(assertionTypes["account"], []string{publisherID}, nil)
+    if err != nil {
+        return fmt.Errorf("failed to fetch developer account assertion for snap %s: %w", snapInfo.SuggestedName, err)
+    }
+
+    // Step 5.1: Determine authority account from snap-declaration
+    authorityID, ok := snapDecl.Header("authority-id").(string)
+    if !ok || authorityID == "" {
+        return fmt.Errorf("snap-declaration assertion missing 'authority-id' header for snap %s", snapInfo.SuggestedName)
+    }
+
+    // Step 5.2: Fetch authority account assertion
+    authorityAccountAssertion, err := storeClient.Assertion(assertionTypes["account"], []string{authorityID}, nil)
+    if err != nil {
+        return fmt.Errorf("failed to fetch authority account assertion for snap %s: %w", snapInfo.SuggestedName, err)
+    }
+
+    // Step 5.3: Fetch developer account assertion
+    developerID, ok := snapRevisionAssertion.Header("developer-id").(string)
+    developerAccountAssertion := authorityAccountAssertion
+    if ok && authorityID != "" {
+        developerAccountAssertion, err = storeClient.Assertion(assertionTypes["account"], []string{developerID}, nil)
+        if err != nil {
+            return fmt.Errorf("failed to fetch developer account assertion for snap %s: %w", snapInfo.SuggestedName, err)
+        }
     }
 
     // Step 6: Write assertions in the desired order
@@ -99,12 +119,20 @@ func downloadAssertions(storeClient *store.Store, snapInfo *snap.Info, downloadD
     writeAssertion("account-key", accountKeyAssertion, assertionsFile)
 
     // 2. account
-    writeAssertion("account", accountAssertion, assertionsFile)
+    writeAssertion("account", publisherAccountAssertion, assertionsFile)
+    if authorityID != publisherID {
+        writeAssertion("account", authorityAccountAssertion, assertionsFile)
+    }
 
     // 3. snap-declaration
     writeAssertion("snap-declaration", snapDecl, assertionsFile)
 
-    // 4. snap-revision (if fetched successfully)
+    // 4. developer account if present
+    if developerAccountAssertion != authorityAccountAssertion {
+        writeAssertion("account", developerAccountAssertion, assertionsFile)
+    }
+
+    // 5. snap-revision (if fetched successfully)
     if snapRevisionAssertion != nil {
         writeAssertion("snap-revision", snapRevisionAssertion, assertionsFile)
     }
@@ -138,11 +166,13 @@ func writeAssertion(assertionType string, assertion asserts.Assertion, file *os.
     body := assertion.Body()
     bodyLength := len(body)
     headers := assertion.Headers()
+    verboseLog("Assertion headers: %v", headers)
 
     // Only write the account assertion if it is not Canonical
     if assertionType == "account" {
         value, exists := headers["username"]
         if exists && value == "canonical" {
+            verboseLog("Skipping assertion due to duplication in account file")
             return
         }
     }

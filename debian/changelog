@@ -1,6 +1,8 @@
 snapd-extra-utils (1.1.0) UNRELEASED; urgency=medium
 
-  * Slightly clean up tests, add new amd64 autopkgtest which checks a livefs.
+  * [snapd-seed-glue] Fix installation of snaps in Calamares Full Installation
+    due to a missing account key, and add an autopkgtest to ensure we catch
+    this ahead of time in the future (LP: #2096649).
 
  -- Simon Quigley <tsimonq2@ubuntu.com>  Sun, 16 Feb 2025 13:36:41 -0600
 
